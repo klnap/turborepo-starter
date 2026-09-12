@@ -11,7 +11,7 @@ import type { RunOptions } from '../shared/spawn'
 import { runProcess } from '../shared/spawn'
 
 /** Pinned release — keep in sync with `.github/workflows/gitleaks.yml` action generation. */
-const GITLEAKS_VERSION = '8.22.1'
+const GITLEAKS_VERSION = '8.24.3'
 
 const BIN_DIR = path.join(ROOT_DIR, '.generated/bin')
 const CACHED_BIN = path.join(BIN_DIR, 'gitleaks')
