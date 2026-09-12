@@ -1,0 +1,81 @@
+name: Bundle Analysis
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Discover Next.js bundle workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_next: ${{ steps.matrix.outputs.has_next }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - id: matrix
+        name: Build Next.js bundle matrix
+        run: |
+          bun scripts/gate/adapters/gh-matrix.ts next-bundle > matrix.json
+          echo "matrix=$(jq -c '.include' matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "has_next=$(jq -r '.has' matrix.json)" >> "$GITHUB_OUTPUT"
+
+  analyze:
+    name: Size Footprint (${{ matrix.workspace }})
+    needs: discover
+    if: needs.discover.outputs.has_next == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    env:
+      SKIP_ENV_VALIDATION: "1"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Read Node version
+        run: echo "NODE_VERSION=$(cat .github/nodejs.version)" >> "$GITHUB_ENV"
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Restore Next.js cache
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: apps/${{ matrix.workspace }}/.next/cache
+          key: ${{ runner.os }}-next-${{ matrix.workspace }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ matrix.workspace }}-
+
+      - name: Analyze bundles (Turbopack)
+        working-directory: apps/${{ matrix.workspace }}
+        run: bunx next experimental-analyze --output
+
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: bundle-analyze-${{ matrix.workspace }}
+          path: apps/${{ matrix.workspace }}/.next/diagnostics/analyze

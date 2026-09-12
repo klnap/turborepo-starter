@@ -1,0 +1,5 @@
+{
+  "$schema": "https://infisical.com/schema/project.json",
+  "workspaceId": "CHANGE_ME_PROJECT_ID",
+  "defaultEnvironment": "development"
+}

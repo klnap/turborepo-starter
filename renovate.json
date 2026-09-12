@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "schedule": ["before 4am on monday"],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "groupName": "React & Next.js ecosystem",
+      "matchPackageNames": ["next", "react", "react-dom", "@types/react", "@types/react-dom"]
+    },
+    {
+      "groupName": "Biome ecosystem",
+      "matchPackagePatterns": ["^@biomejs/"]
+    },
+    {
+      "groupName": "Valibot ecosystem",
+      "matchPackagePatterns": ["^valibot", "^@conform-to/valibot"]
+    }
+  ]
+}

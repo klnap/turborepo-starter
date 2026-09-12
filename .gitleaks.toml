@@ -1,0 +1,13 @@
+title = "turborepo-starter gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated artifacts and lockfiles (not secret sources)"
+paths = [
+  '''(^|/)\.generated/''',
+  '''(^|/)bun\.lock$''',
+  '''(^|/)\.next/''',
+  '''(^|/)node_modules/''',
+]

@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # npm / bun dependencies - version updates disabled to avoid conflict with Renovate.
+  # Security vulnerability alerts (SCA) remain fully active.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+
+  # GitHub Actions workflows - version updates disabled (managed by Renovate).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0

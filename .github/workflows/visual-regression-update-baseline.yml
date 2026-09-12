@@ -1,0 +1,77 @@
+name: Visual regression — update baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: "App workspace (discovered automatically when empty)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    name: Discover visual workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_visual: ${{ steps.matrix.outputs.has_visual }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - id: matrix
+        name: Build visual workspace matrix
+        run: |
+          bun scripts/gate/adapters/gh-matrix.ts visual > matrix.json
+          if [ -n "${{ github.event.inputs.workspace }}" ]; then
+            echo '{"include":[{"workspace":"'"${{ github.event.inputs.workspace }}"'"}],"has":true}' > matrix.json
+          fi
+          echo "matrix=$(jq -c '.include' matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "has_visual=$(jq -r '.has' matrix.json)" >> "$GITHUB_OUTPUT"
+
+  update-baseline:
+    name: Regenerate Storybook snapshots (${{ matrix.workspace }})
+    needs: discover
+    if: needs.discover.outputs.has_visual == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    strategy:
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    env:
+      SKIP_ENV_VALIDATION: "1"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: "24.x"
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bun ws ${{ matrix.workspace }} test:e2e:install -- --with-deps chromium
+
+      - name: Update visual baseline
+        run: bun ws ${{ matrix.workspace }} visual --update
+
+      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
+        with:
+          commit_message: "chore: update visual regression baseline (${{ matrix.workspace }})"
+          file_pattern: apps/${{ matrix.workspace }}/tests/e2e/visual-storybook.spec.ts-snapshots/**

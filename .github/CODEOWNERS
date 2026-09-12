@@ -1,0 +1,15 @@
+# GitHub Code Owners
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Configure code owners for pull requests by replacing the handles below with your own username or team:
+#
+# Default owners for review on every pull request
+# * @your-org/core-team
+#
+# Repository tooling and CI
+# /scripts/ @your-org/platform-team
+# /.github/ @your-org/platform-team
+# /turbo.json @your-org/platform-team
+#
+# Application workspaces
+# /apps/ @your-org/app-maintainers

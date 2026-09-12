@@ -1,0 +1,15 @@
+# Turborepo Monorepo Starter
+> Developer platform and monorepo shell for shipping high-performance applications on Bun and Turborepo.
+
+## Architectural Model
+- Monorepo Shell: Root repository manages governance, quality gates, CI/CD, and developer tooling.
+- Dynamic Workspaces: Applications live under `apps/<app>/` (e.g. `apps/web`, `apps/cms`).
+- Scoped CLI: `bun root <task>`, `bun ws <app> <task>`, `bun adopt <path>`.
+- Quality Gates: `bun run gate:quick` (pre-commit), `bun run gate:push` (pre-push), `bun run gate:ci` (CI).
+
+## Workspaces Directory
+- `apps/` — Application workspaces (adopt starters via `bun adopt apps/<app>`)
+- `scripts/` — CLI, quality gates, CI runners, and audits
+- `docs/` — Architecture documentation, ADR records (`docs/adr/`), and guides
+- `specs/` — Feature specifications
+- `.agents/skills/` — AI procedural skills and coding standards

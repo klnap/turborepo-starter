@@ -1,0 +1,5 @@
+# Monorepo root Bun configuration
+
+[test]
+# Ignore Playwright e2e/spec files when bun test is invoked from workspace root
+testMatch = ["**/*.test.ts", "**/*.test.tsx"]

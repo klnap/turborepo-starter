@@ -1,0 +1,38 @@
+# https://aquasecurity.github.io/trivy/latest/docs/configuration/
+
+severity:
+  - HIGH
+  - CRITICAL
+
+scan:
+  scanners:
+    - vuln
+  skip-dirs:
+    # Dependencies
+    - node_modules
+    # Next.js build output
+    - .next
+    - out
+    - build
+    - dist
+    # Turborepo cache
+    - .turbo
+    # TypeScript incremental build cache
+    - .tsbuild
+    # Monorepo generated artifacts (git-ignored)
+    - .generated
+    # Test & coverage outputs
+    - coverage
+    - playwright-report
+    - test-results
+    - blob-report
+    - .stryker-tmp
+    # Storybook
+    - storybook-static
+    # Vercel / deployment
+    - .vercel
+    # Playwright cache
+    - playwright/.cache
+
+# Fail CI on HIGH/CRITICAL vulns in dependencies / lockfile
+exit-code: 1

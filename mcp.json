@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "apps/web/src",
+        "apps/web/specs",
+        "docs",
+        "specs",
+        "scripts"
+      ],
+      "excludePatterns": [
+        ".env",
+        ".env.*",
+        "*.pem",
+        "*.key",
+        "*.p12",
+        "*.pfx",
+        "node_modules",
+        ".git/config"
+      ]
+    },
+    "git": {
+      "command": "bunx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://v2-10-12.turborepo.dev/schema.json",
+  "globalEnv": ["CI"],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["SKIP_ENV_VALIDATION"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    },
+
+    "lint:code": {},
+    "lint:code:fix": {
+      "cache": false
+    },
+    "lint:i18n": {},
+    "lint:architecture": {},
+    "lint": {},
+    "lint:fix": {
+      "cache": false
+    },
+    "boundaries": {},
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "format": {
+      "cache": false
+    },
+    "format:check": {},
+    "knip": {},
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "test:mutation": {
+      "cache": false,
+      "outputs": [".generated/stryker/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "test:e2e:install": {
+      "cache": false
+    },
+    "test:a11y": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "lighthouse": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": [".generated/storybook-static/**"]
+    },
+    "visual": {
+      "dependsOn": ["build-storybook"],
+      "cache": false
+    },
+
+    "checkly:test": {
+      "cache": false,
+      "env": [
+        "CHECKLY_ENABLED",
+        "CHECKLY_API_KEY",
+        "CHECKLY_ACCOUNT_ID",
+        "CHECKLY_PROJECT_NAME",
+        "CHECKLY_LOGICAL_ID",
+        "CHECKLY_ALERT_EMAILS",
+        "SITE_URL"
+      ]
+    },
+    "checkly:deploy": {
+      "cache": false,
+      "env": [
+        "CHECKLY_ENABLED",
+        "CHECKLY_API_KEY",
+        "CHECKLY_ACCOUNT_ID",
+        "CHECKLY_PROJECT_NAME",
+        "CHECKLY_LOGICAL_ID",
+        "CHECKLY_ALERT_EMAILS",
+        "SITE_URL"
+      ]
+    },
+
+    "coupling-graph": {
+      "cache": false
+    },
+    "icons": {},
+    "docs:generate": {
+      "dependsOn": ["^build"],
+      "outputs": [".generated/docs/**"]
+    }
+  }
+}

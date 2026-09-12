@@ -1,0 +1,93 @@
+name: Visual regression
+
+on:
+  pull_request:
+    paths:
+      - "apps/*/src/components/**"
+      - "apps/*/src/modules/**"
+      - "apps/*/.storybook/**"
+      - "apps/*/tests/e2e/visual-storybook.spec.ts"
+      - "apps/*/tests/e2e/visual-storybook.spec.ts-snapshots/**"
+      - "apps/*/playwright.config.ts"
+      - "scripts/tooling/visual/run.ts"
+      - "scripts/tooling/lighthouse/run.ts"
+      - "scripts/shared/workspace-capabilities.ts"
+      - "scripts/gate/adapters/gh-matrix.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    name: Discover visual workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_visual: ${{ steps.matrix.outputs.has_visual }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - id: matrix
+        name: Build visual workspace matrix
+        run: |
+          bun scripts/gate/adapters/gh-matrix.ts visual > matrix.json
+          echo "matrix=$(jq -c '.include' matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "has_visual=$(jq -r '.has' matrix.json)" >> "$GITHUB_OUTPUT"
+
+  visual:
+    name: Storybook screenshots (${{ matrix.workspace }})
+    needs: discover
+    if: needs.discover.outputs.has_visual == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    env:
+      SKIP_ENV_VALIDATION: "1"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: "24.x"
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bun ws ${{ matrix.workspace }} test:e2e:install -- --with-deps chromium
+
+      - name: Visual regression
+        run: bun ws ${{ matrix.workspace }} visual
+
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        if: failure()
+        with:
+          name: visual-regression-diffs-${{ matrix.workspace }}
+          path: |
+            apps/${{ matrix.workspace }}/.generated/test-results/
+            apps/${{ matrix.workspace }}/.generated/playwright-report/
+          retention-days: 7

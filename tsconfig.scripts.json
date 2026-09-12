@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": ".tsbuild",
+    "rootDir": ".",
+    "types": ["node", "bun"],
+    "lib": ["ES2022"],
+    "baseUrl": ".",
+    "paths": {
+      "@scripts/*": ["./scripts/*"]
+    }
+  },
+  "include": ["scripts/**/*.ts", "scripts/**/*.mjs"],
+  "exclude": ["node_modules", "apps", "packages", "scripts/oxlint"]
+}

@@ -1,0 +1,79 @@
+name: Checkly
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: checkly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Discover Checkly workspaces
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_checkly: ${{ steps.matrix.outputs.has_checkly }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - id: matrix
+        name: Build Checkly workspace matrix
+        run: |
+          bun scripts/gate/adapters/gh-matrix.ts checkly > matrix.json
+          echo "matrix=$(jq -c '.include' matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "has_checkly=$(jq -r '.has' matrix.json)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy Synthetic Checks (${{ matrix.workspace }})
+    needs: discover
+    if: vars.CHECKLY_ENABLED == 'true' && needs.discover.outputs.has_checkly == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.workspace }}
+    env:
+      CHECKLY_ENABLED: "true"
+      CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+      CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+      CHECKLY_PROJECT_NAME: ${{ vars.CHECKLY_PROJECT_NAME }}
+      CHECKLY_LOGICAL_ID: ${{ vars.CHECKLY_LOGICAL_ID }}
+      CHECKLY_ALERT_EMAILS: ${{ secrets.CHECKLY_ALERT_EMAILS }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Read Node version
+        run: echo "NODE_VERSION=$(cat .github/nodejs.version)" >> "$GITHUB_ENV"
+
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.0"
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install
+        run: bun install --frozen-lockfile
+        working-directory: .
+
+      - name: Deploy
+        run: bun run checkly:deploy

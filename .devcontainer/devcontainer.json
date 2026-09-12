@@ -1,0 +1,28 @@
+{
+  "name": "Turborepo Monorepo",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "quickfix.biome": "explicit",
+          "source.organizeImports.biome": "explicit"
+        }
+      },
+      "extensions": [
+        "biomejs.biome",
+        "oxc.oxc-vscode",
+        "bradlc.vscode-tailwindcss",
+        "playwright.playwright"
+      ]
+    }
+  },
+  "postCreateCommand": "npm install -g bun@latest && bun install",
+  "remoteUser": "node"
+}

@@ -1,0 +1,105 @@
+# ==============================================================================
+# UNIVERSAL MONOREPO GITIGNORE
+# Single source of truth for repository ignores & artifact containment.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. DEPENDENCIES & PACKAGE MANAGERS
+# ------------------------------------------------------------------------------
+node_modules
+.bun
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Foreign lockfiles (Monorepo strictly enforces Bun 1.4+ with bun.lock)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
+
+# Package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ------------------------------------------------------------------------------
+# 2. BUILD, COMPILATION & FRAMEWORK OUTPUTS
+# ------------------------------------------------------------------------------
+.next
+out
+build
+dist
+.tsbuild
+*.tsbuildinfo
+next-env.d.ts
+.turbo
+.vercel
+
+# ------------------------------------------------------------------------------
+# 3. ARTIFACT CONTAINMENT, TESTING & EPHEMERAL DATA
+# ------------------------------------------------------------------------------
+# All generated/ephemeral data MUST target workspace-local .generated/
+.generated
+.generated/
+**/.generated/
+**/.generated
+
+# Test runners & coverage
+coverage
+.lighthouseci
+.checkly
+playwright/.cache
+test-results
+playwright-report
+blob-report
+.stryker-tmp
+
+# ------------------------------------------------------------------------------
+# 4. SECURITY, SECRETS & ENVIRONMENT VARIABLES
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Certificates, keys and credentials
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+secrets.*
+*.secret
+
+# ------------------------------------------------------------------------------
+# 5. OS & IDE LOCAL FILES
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs & Editors
+.idea
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project

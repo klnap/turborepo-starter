@@ -1,0 +1,42 @@
+# Dependencies and package managers
+**/node_modules
+**/bun.lockb
+.pnpm-store
+
+# Build outputs and generated directories
+**/.next
+**/dist
+**/build
+**/out
+**/.turbo
+**/.tsbuild
+**/.generated
+**/.storybook-static
+
+# Environment files
+.env
+.env*.local
+.env.production
+.env.development
+
+# Version control and IDEs
+.git
+.github
+.githooks
+.gitignore
+.vscode
+.idea
+.editorconfig
+
+# Testing, coverage, and reports
+coverage
+**/.lighthouseci
+**/.checkly
+**/.storybook
+**/.agents
+*.log
+*.tsbuildinfo
+
+# Operating system files
+.DS_Store
+Thumbs.db
