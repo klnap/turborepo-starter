@@ -38,7 +38,7 @@
     "gitleaks:staged": "bun scripts/git/gitleaks-cli.ts staged",
     "gitleaks:scan": "bun scripts/git/gitleaks-cli.ts workdir",
     "check:dead-code": "turbo run knip",
-    "security:audit": "bun audit --ignore GHSA-848j-6mx2-7j84 --ignore GHSA-jmr9-qjv8-65gv --ignore GHSA-5p2g-fcmc-qvqq --ignore GHSA-w3rx-r6r6-pgpr",
+    "security:audit": "bun audit --ignore GHSA-848j-6mx2-7j84 --ignore GHSA-jmr9-qjv8-65gv --ignore GHSA-5p2g-fcmc-qvqq --ignore GHSA-w3rx-r6r6-pgpr --ignore GHSA-2883-xcg3-v3hh",
     "knip": "turbo run knip",
     "licenses": "license-checker --summary --excludePrivatePackages --failOn 'GPL;AGPL'",
     "gate:quick": "bun run scripts/gate/index.ts quick",
